@@ -1417,7 +1417,7 @@
       '<div style="margin-top:22px"><a class="btn btn-primary" href="#/tickets">Open My Tickets</a></div>' +
       "</div>" +
       '<div class="stack gap10">' +
-      '<div class="card-flat row between"><span class="mono xs dim">VERIFIED PARTICIPATIONS</span><b class="mono" id="teaserCount">00</b></div>' +
+      '<div class="card-flat row between"><span class="mono xs dim">VERIFIED PARTICIPATIONS</span><b class="mono" id="teaserCount">-</b></div>' +
       '<div class="card-flat row between"><span class="mono xs dim">FIRST PROOF</span><b class="mono xs" id="teaserFirst">—</b></div>' +
       '<div class="card-flat row between"><span class="mono xs dim">LATEST PROOF</span><b class="mono xs" id="teaserLast">—</b></div>' +
       "</div>" +
@@ -1458,26 +1458,6 @@
       '<div class="card-flat row between"><span class="mono xs dim">CURRENCY</span><b class="mono xs">BOT</b></div>' +
       '<a class="btn btn-ghost btn-sm" href="https://faucet.botchain.ai/basic" target="_blank" rel="noopener noreferrer">Get testnet BOT ↗</a>' +
       "</div>" +
-      "</div>" +
-      "</div>" +
-      "</section>" +
-      "<section>" +
-      sectionHead("Live", "Right now", "Your current session status.") +
-      '<div class="grid2">' +
-      '<div class="card"><div class="kicker">Connection</div>' +
-      '<div style="margin-top:12px" id="homeStatus"></div>' +
-      '<p class="small muted" style="margin-top:12px">Status reflects real browser and RPC state, including idle detection after 10 seconds of inactivity.</p>' +
-      "</div>" +
-      '<div class="card"><div class="kicker">Your wallet</div>' +
-      '<div class="mono" style="margin-top:12px;font-size:1.05rem">' +
-      (S.account ? esc(shortAddr(S.account)) : "NOT CONNECTED") +
-      "</div>" +
-      '<div class="small muted" style="margin-top:6px">' +
-      esc(currentNetwork().name) +
-      "</div>" +
-      '<button class="btn btn-ghost btn-sm" id="homeWallet" style="margin-top:16px">' +
-      (S.connected ? "Open wallet" : "Connect wallet") +
-      "</button>" +
       "</div>" +
       "</div>" +
       "</section>"
@@ -2390,18 +2370,6 @@
       '" data-theme-set="light">Light</button>' +
       "</div>" +
       '<p class="small muted" style="margin-top:14px">ProofPass uses a warm graphite dark theme and a parchment light theme. Accent: <span class="mono">#BFB18C</span>.</p>' +
-      "</div>" +
-      '<div class="card">' +
-      '<div class="kicker" style="margin-bottom:16px">Motion</div>' +
-      '<div class="row gap10">' +
-      '<button class="chip' +
-      (S.motion === "full" ? " on" : "") +
-      '" data-motion-set="full">Full motion</button>' +
-      '<button class="chip' +
-      (S.motion === "reduced" ? " on" : "") +
-      '" data-motion-set="reduced">Reduced motion</button>' +
-      "</div>" +
-      '<p class="small muted" style="margin-top:14px">Your system preference for reduced motion is respected automatically on first visit.</p>' +
       "</div>" +
       '<div class="card">' +
       '<div class="kicker" style="margin-bottom:16px">Network</div>' +
