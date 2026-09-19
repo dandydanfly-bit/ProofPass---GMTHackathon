@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-motion="full">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>ProofPass — Your Presence. Your Proof.</title>
+    <meta
+      name="description"
+      content="ProofPass turns real-world event attendance into publicly verifiable on-chain proof on BOT Chain."
+    />
+    <meta name="theme-color" content="#212324" />
+    <meta
+      property="og:title"
+      content="ProofPass — Your Presence. Your Proof."
+    />
+    <meta
+      property="og:description"
+      content="Decentralized participation verification on BOT Chain."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23212324'/%3E%3Cpath d='M10 9h12v3.2H13.2v3h7.4v3.2h-7.4V23H10z' fill='%23BFB18C'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="proofpass.css" />
+  </head>
+  <body>
+    <!-- ══════════════ LOADING SCREEN ══════════════ -->
+    <div id="boot" class="boot" role="status" aria-label="Loading ProofPass">
+      <div class="boot-stage">
+        <div class="boot-ticket">
+          <div class="boot-half top">
+            <div class="inner">
+              <div class="boot-brand"><span class="m"></span> PROOFPASS</div>
+              <div class="boot-meta strong">BUILD WEEK VOL.2</div>
+              <div class="boot-meta">18 SEP 2026 · JAKARTA</div>
+            </div>
+          </div>
+          <div class="boot-half bottom">
+            <div class="inner" style="justify-content: flex-end">
+              <div class="boot-meta">PASS #00421</div>
+              <div class="boot-meta">0x7A…91F2 · BOT CHAIN</div>
+            </div>
+          </div>
+          <div class="boot-cut"></div>
+          <div class="boot-sweep"></div>
+        </div>
+        <div class="boot-word">PROOFPASS</div>
+        <div class="boot-sub">Your Presence. Your Proof.</div>
+      </div>
+    </div>
+
+    <div id="app">
+      <!-- ══════════════ CHROME ══════════════ -->
+      <div class="chrome">
+        <div class="sysbar">
+          <div class="wrap">
+            <span class="sys-spacer"></span>
+            <span class="row gap6" id="sysStatus" title="Connection status">
+              <i class="dot"></i><span>…</span>
+            </span>
+            <span class="sep hide-sm">/</span>
+            <span class="hide-sm" id="sysNet">BOT CHAIN</span>
+            <span class="sep hide-sm">/</span>
+            <span class="hide-sm mono" id="sysAddr">NOT CONNECTED</span>
+          </div>
+        </div>
+        <header class="nav">
+          <div class="wrap">
+            <a href="#/" class="brand" aria-label="ProofPass home">
+              <span class="mark">PP</span>
+              <span class="wm">ProofPass<small>ON BOT CHAIN</small></span>
+            </a>
+            <nav class="navlinks" id="navlinks" aria-label="Primary">
+              <a href="#/" data-route="/">Home</a>
+              <a href="#/tickets" data-route="/tickets">My Tickets</a>
+              <a href="#/wallet" data-route="/wallet">Wallet</a>
+              <a href="#/events" data-route="/events">Events</a>
+              <a href="#/settings" data-route="/settings">Settings</a>
+            </nav>
+            <div class="nav-right">
+              <button
+                class="icon-btn"
+                id="themeBtn"
+                title="Toggle theme"
+                aria-label="Toggle light and dark theme"
+              ></button>
+              <button class="btn btn-primary btn-sm" id="connectBtn">
+                Connect Wallet
+              </button>
+              <button
+                class="icon-btn burger"
+                id="burger"
+                aria-label="Menu"
+                aria-expanded="false"
+              >
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <path d="M3 6h18M3 12h18M3 18h18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="mobilemenu" id="mobilemenu">
+            <div class="wrap">
+              <a href="#/">Home</a>
+              <a href="#/tickets">My Tickets</a>
+              <a href="#/wallet">Wallet</a>
+              <a href="#/events">Events</a>
+              <a href="#/settings">Settings</a>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      <!-- ══════════════ VIEW ══════════════ -->
+      <main id="view" class="wrap" tabindex="-1"></main>
+
+      <!-- ══════════════ FOOTER ══════════════ -->
+      <footer class="footer">
+        <div class="wrap">
+          <div class="foot-grid">
+            <div class="foot-col">
+              <a href="#/" class="brand" style="margin-bottom: 12px">
+                <span class="mark">PP</span>
+                <span class="wm">ProofPass<small>ON BOT CHAIN</small></span>
+              </a>
+              <p class="small muted" style="max-width: 32ch">
+                Your Presence. Your Proof. Turn real-world participation into
+                verifiable on-chain proof.
+              </p>
+              <div class="row gap8 wrapflex" style="margin-top: 16px">
+                <span class="pill"
+                  ><i class="dot" style="color: var(--ok)"></i>
+                  <span id="footNet">BOT CHAIN TESTNET</span></span
+                >
+              </div>
+            </div>
+            <div class="foot-col">
+              <h4>Product</h4>
+              <a href="#/">Home</a>
+              <a href="#/tickets">My Tickets</a>
+              <a href="#/wallet">Wallet</a>
+              <a href="#/events">Events</a>
+              <a href="#/settings">Settings</a>
+            </div>
+            <div class="foot-col">
+              <h4>BOT Chain</h4>
+              <a
+                href="https://botchain.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >botchain.ai ↗</a
+              >
+              <a
+                href="https://scan.botchain.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Mainnet Explorer ↗</a
+              >
+              <a
+                href="https://scan.bohr.life/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Testnet Explorer ↗</a
+              >
+              <a
+                href="https://dev-docs.botchain.ai/docs/intro"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Developer Docs ↗</a
+              >
+              <a
+                href="https://faucet.botchain.ai/basic"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Faucet ↗</a
+              >
+            </div>
+            <div class="foot-col">
+              <h4>Hackathon</h4>
+              <a
+                href="https://www.girlmeetstech.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Girl Meets Tech ↗</a
+              >
+              <a
+                href="https://www.girlmeetstech.org/guidebook-build-week-hackathon-vol2"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Build Week Guidebook ↗</a
+              >
+              <a
+                href="https://x.com/BOTChain_ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                >@BOTChain_ai ↗</a
+              >
+              <a
+                href="https://x.com/gmtech_"
+                target="_blank"
+                rel="noopener noreferrer"
+                >@gmtech_ ↗</a
+              >
+            </div>
+          </div>
+          <div class="foot-bottom">
+            <span
+              >© <span id="year"></span> ProofPass · Built on BOT Chain · Girl
+              Meets Tech Build Week Hackathon Vol.2</span
+            >
+            <span class="mono" id="footContract">CONTRACT: —</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- /#app -->
+
+    <div id="modal" class="modal" hidden></div>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+  <script src="proofpass.js"></script>
+</html>
