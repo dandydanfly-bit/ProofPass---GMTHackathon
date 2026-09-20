@@ -1162,7 +1162,7 @@
       '">' +
       '<div class="ticket-top">' +
       '<div class="ticket-brandrow">' +
-      '<span class="ticket-brand"><span class="m">PP</span> PROOFPASS</span>' +
+      '<span class="ticket-brand"> PROOFPASS</span>' +
       '<span class="mono xs dim">' +
       esc(o.serial || "—") +
       "</span>" +
@@ -1539,7 +1539,6 @@
     return (
       banner +
       sectionHead(
-        "Discovery",
         "Events",
         "Find an event, claim your pass, and start building your proof history.",
       ) +
@@ -1800,7 +1799,6 @@
     if (!S.connected) {
       return (
         sectionHead(
-          "Account",
           "My Tickets",
           "Connect your wallet to see your passes and proofs.",
         ) +
@@ -1934,7 +1932,6 @@
     if (!S.connected) {
       return (
         sectionHead(
-          "Wallet",
           "Wallet",
           "Manage your connected wallet and BOT Chain network.",
         ) +
@@ -2354,7 +2351,6 @@
     const net = currentNetwork();
     return (
       sectionHead(
-        "Preferences",
         "Settings",
         "Appearance, network and motion preferences are stored locally in your browser.",
       ) +
@@ -2369,7 +2365,7 @@
       (S.theme === "light" ? " on" : "") +
       '" data-theme-set="light">Light</button>' +
       "</div>" +
-      '<p class="small muted" style="margin-top:14px">ProofPass uses a warm graphite dark theme and a parchment light theme. Accent: <span class="mono">#BFB18C</span>.</p>' +
+      '<p class="small muted" style="margin-top:14px">ProofPass uses a warm graphite dark theme and a parchment light theme.<span class="mono"></span></p>' +
       "</div>" +
       '<div class="card">' +
       '<div class="kicker" style="margin-bottom:16px">Network</div>' +
@@ -2386,22 +2382,6 @@
       '<div class="mono xs dim" style="margin-top:12px">RPC ' +
       esc(net.rpc) +
       "</div>" +
-      "</div>" +
-      '<div class="card">' +
-      '<div class="kicker" style="margin-bottom:16px">Wallet</div>' +
-      (S.connected
-        ? '<div class="mono small">' +
-          esc(S.account) +
-          "</div>" +
-          '<div class="row gap10 wrapflex" style="margin-top:14px">' +
-          '<button class="btn btn-ghost btn-sm" data-copy="' +
-          esc(S.account) +
-          '">' +
-          ICONS.copy +
-          " Copy address</button>" +
-          '<button class="btn btn-ghost btn-sm" id="disconnectBtn">Disconnect</button>' +
-          "</div>"
-        : '<p class="small muted">No wallet connected.</p><button class="btn btn-primary btn-sm" id="settingsConnect" style="margin-top:14px">Connect Wallet</button>') +
       "</div>" +
       '<div class="card">' +
       '<div class="kicker" style="margin-bottom:16px">Contract</div>' +
@@ -2446,8 +2426,6 @@
         target === r.path || (r.path === "/event" && target === "/events"),
       );
     });
-    $("#mobilemenu").classList.remove("open");
-    $("#burger").setAttribute("aria-expanded", "false");
 
     switch (r.path) {
       case "/":
@@ -2901,11 +2879,7 @@
       connectWallet();
     }
   };
-  $("#burger").onclick = () => {
-    const m = $("#mobilemenu");
-    const open = m.classList.toggle("open");
-    $("#burger").setAttribute("aria-expanded", open ? "true" : "false");
-  };
+
   window.addEventListener("hashchange", render);
 
   /* ─────────────────────────── 19. WALLET EVENTS ─────────────────────────── */
