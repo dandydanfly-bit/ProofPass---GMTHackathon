@@ -1,6 +1,22 @@
 /* ============================================================================
    PROOFPASS — Application
    ========================================================================== */
+
+let S = {
+  connected: false,
+  account: null,
+  provider: null,
+  signer: null,
+  readProvider: null,
+  readContract: null,
+  writeContract: null,
+  myContractTicket: null, // <-- Taruh di sini di dalam objek S
+  events: [],
+  myPasses: [],
+  myProofs: [],
+  orgEvents: [],
+  // dan seterusnya...
+};
 (function () {
   "use strict";
 
@@ -9,7 +25,7 @@
     Nothing else in this file needs to change for a new deployment.          */
   const CONFIG = {
     contractAddresses: {
-      968: "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", // ← BOT Chain Testnet address  (e.g. "0x1234…")
+      968: "0x406AB5033423Dcb6391Ac9eEEad73294FA82Cfbc", // ← BOT Chain Testnet address  (e.g. "0x1234…")
       677: "", // ← BOT Chain Mainnet address  (e.g. "0xabcd…")
     },
     defaultNetworkId: 968,
@@ -44,13 +60,105 @@
 
   /* ─────────────────────────── 2. ABI ─────────────────────────── */
   const ABI = [
-    "constructor()",
-    "event TicketClaimed(address indexed user)",
-    "function claimTicket()",
-    "function owner() view returns (address)",
-    "function tickets(address) view returns (address holder, uint256 claimDate, bool isValid)",
-    "function totalClaimed() view returns (uint256)",
-    "function verifyTicket(address userAddress) view returns (bool)",
+    {
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "user",
+          type: "address",
+        },
+      ],
+      name: "TicketClaimed",
+      type: "event",
+    },
+    {
+      inputs: [],
+      name: "claimTicket",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "owner",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      name: "tickets",
+      outputs: [
+        {
+          internalType: "address",
+          name: "holder",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "claimDate",
+          type: "uint256",
+        },
+        {
+          internalType: "bool",
+          name: "isValid",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "totalClaimed",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "userAddress",
+          type: "address",
+        },
+      ],
+      name: "verifyTicket",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
   ];
 
   /* ─────────────────────────── 3. STATE ─────────────────────────── */
@@ -994,9 +1102,7 @@
   async function loadUserData() {
     if (!S.connected || !S.account) return;
     if (!isConfigured()) {
-      S.myPasses = [];
-      S.myProofs = [];
-      S.orgEvents = [];
+      S.myContractTicket = null;
       return;
     }
     const c =
@@ -1004,45 +1110,22 @@
       new ethers.Contract(contractAddress(), ABI, S.readProvider);
     if (!c) return;
     try {
-      const passIds = await c.getPassesOf(S.account);
-      const passes = [];
-      for (const pid of passIds) {
-        try {
-          passes.push(await c.getPass(pid));
-        } catch (e) {}
+      if (c.tickets) {
+        const t = await c.tickets(S.account);
+        const holder = t.holder || t[0];
+        if (holder && holder !== "0x0000000000000000000000000000000000000000") {
+          S.myContractTicket = {
+            holder: holder,
+            claimDate: Number(t.claimDate || t[1]) * 1000,
+            isValid: t.isValid ?? t[2],
+          };
+        } else {
+          S.myContractTicket = null;
+        }
       }
-      S.myPasses = passes.map((p) => ({
-        id: Number(p.id),
-        eventId: Number(p.eventId),
-        attendee: p.attendee,
-        claimedAt: Number(p.claimedAt) * 1000,
-        attended: p.attended,
-        verifiedAt: Number(p.verifiedAt) * 1000,
-        valid: p.valid,
-      }));
-
-      const proofIds = await c.getProofIdsOf(S.account);
-      const proofs = [];
-      for (const id of proofIds) {
-        try {
-          proofs.push(await c.getProof(id));
-        } catch (e) {}
-      }
-      S.myProofs = proofs.map((p) => ({
-        proofId: p.proofId,
-        eventId: Number(p.eventId),
-        passId: Number(p.passId),
-        attendee: p.attendee,
-        organizer: p.organizer,
-        verifiedAt: Number(p.verifiedAt) * 1000,
-        valid: p.valid,
-      }));
-
-      const orgIds = await c.getEventsByOrganizer(S.account);
-      S.orgEvents = orgIds.map((n) => Number(n));
     } catch (e) {
-      console.warn("[ProofPass] loadUserData failed", e);
-      toast("Unable to read ProofPass contract state.", "err");
+      console.warn("[ProofPass] loadUserData info:", e);
+      S.myContractTicket = null;
     }
   }
 
@@ -1695,7 +1778,6 @@
     const verifiedCount = S.myPasses.filter((p) => p.attended).length;
     const proofCount = S.myProofs.length;
 
-    // Cek apakah ada tiket dari TicketContract buatan kita
     let userTicketHTML = "";
     if (S.myContractTicket) {
       const t = S.myContractTicket;
@@ -1716,41 +1798,12 @@
     }
 
     const passRows =
-      userTicketHTML +
-      (S.myPasses.length
-        ? S.myPasses
-            .map((p) => {
-              const ev = S.events.find((e) => e.id === p.eventId);
-              const name = ev ? ev.name : "Event #" + p.eventId;
-              return (
-                '<div class="card-flat row between gap12 wrapflex" style="margin-bottom:10px">' +
-                '<div style="min-width:180px"><div style="font-weight:500">' +
-                esc(name) +
-                "</div>" +
-                '<div class="mono xs dim" style="margin-top:4px">PASS #' +
-                String(p.id).padStart(5, "0") +
-                " · EVENT #" +
-                p.eventId +
-                "</div></div>" +
-                '<div class="row gap8">' +
-                (p.attended
-                  ? '<span class="pill ok"><i class="dot"></i>VERIFIED</span>'
-                  : '<span class="pill acc"><i class="dot"></i>CLAIMED</span>') +
-                '<a class="btn btn-ghost btn-sm" href="#/event/' +
-                p.eventId +
-                '">Open</a>' +
-                "</div>" +
-                "</div>"
-              );
-            })
-            .join("")
-        : !userTicketHTML
-          ? emptyState(
-              "",
-              "No tickets yet",
-              "Claim a pass for an event to start your participation record.",
-            )
-          : "");
+      userTicketHTML ||
+      emptyState(
+        "",
+        "No tickets yet",
+        "Claim a pass for an event to start your participation record.",
+      );
 
     const proofRows = S.myProofs.length
       ? S.myProofs
@@ -2419,7 +2472,7 @@
     );
   }
 
-  function updateHomeStats() {
+  async function updateHomeStats() {
     const set = (id, v) => {
       const el = document.getElementById(id);
       if (el) el.textContent = v;
@@ -2429,22 +2482,16 @@
       set("heroStatProofs", "—");
       return;
     }
+    // Menggunakan totalClaimed dari TicketContract buatanmu
     S.readContract
-      .passCount()
+      .totalClaimed()
       .then((n) => set("heroStatPasses", Number(n)))
       .catch(() => set("heroStatPasses", "—"));
-    S.readContract
-      .proofCount()
-      .then((n) => set("heroStatProofs", Number(n)))
-      .catch(() => set("heroStatProofs", "—"));
+
+    // Karena contract kustom tidak punya proofCount, kita set 0 atau strip
+    set("heroStatProofs", "0");
+
     set("teaserCount", String(S.myProofs.length).padStart(2, "0"));
-    const sorted = S.myProofs
-      .slice()
-      .sort((a, b) => a.verifiedAt - b.verifiedAt);
-    if (sorted.length) {
-      set("teaserFirst", sorted[0].proofId);
-      set("teaserLast", sorted[sorted.length - 1].proofId);
-    }
   }
 
   function bindHome() {
@@ -2553,11 +2600,12 @@
           return;
         }
         await runTransaction({
-          send: () => S.writeContract.claimTicket(),
+          send: () => S.writeContract.claimTicket({ gasLimit: 300000 }),
           successTitle: "Tiket Berhasil Diklaim!",
           successNote: "Transaksi claimTicket sukses di-mining ke blockchain.",
           onSuccess: async () => {
-            toast("Tiket berhasil diklaim ke Smart Contract!", "ok");
+            await loadUserData();
+            if (typeof render === "function") render();
           },
         });
       };
