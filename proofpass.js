@@ -9,7 +9,7 @@
     Nothing else in this file needs to change for a new deployment.          */
   const CONFIG = {
     contractAddresses: {
-      968: "", // ← BOT Chain Testnet address  (e.g. "0x1234…")
+      968: "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", // ← BOT Chain Testnet address  (e.g. "0x1234…")
       677: "", // ← BOT Chain Mainnet address  (e.g. "0xabcd…")
     },
     defaultNetworkId: 968,
@@ -44,36 +44,13 @@
 
   /* ─────────────────────────── 2. ABI ─────────────────────────── */
   const ABI = [
+    "constructor()",
+    "event TicketClaimed(address indexed user)",
+    "function claimTicket()",
     "function owner() view returns (address)",
-    "function eventCount() view returns (uint256)",
-    "function passCount() view returns (uint256)",
-    "function proofCount() view returns (uint256)",
-
-    "function createEvent(string name, string metadataURI, uint256 eventTimestamp, uint256 capacity) returns (uint256)",
-    "function setEventActive(uint256 eventId, bool active)",
-    "function claimPass(uint256 eventId) returns (uint256)",
-    "function verifyAttendance(uint256 passId) returns (string)",
-    "function revokeProof(string proofId)",
-
-    "function getEvent(uint256 eventId) view returns (tuple(uint256 id, address organizer, string name, string metadataURI, uint256 eventTimestamp, uint256 capacity, uint256 totalClaimed, bool active))",
-    "function getAllEvents() view returns (tuple(uint256 id, address organizer, string name, string metadataURI, uint256 eventTimestamp, uint256 capacity, uint256 totalClaimed, bool active)[])",
-    "function getEventsByOrganizer(address organizer) view returns (uint256[])",
-    "function getPass(uint256 passId) view returns (tuple(uint256 id, uint256 eventId, address attendee, uint256 claimedAt, bool attended, uint256 verifiedAt, bool valid))",
-    "function getPassesOf(address attendee) view returns (uint256[])",
-    "function getPassOf(uint256 eventId, address attendee) view returns (uint256)",
-    "function hasClaimed(uint256 eventId, address attendee) view returns (bool)",
-    "function getEventAttendees(uint256 eventId) view returns (uint256[])",
-    "function getProof(string proofId) view returns (tuple(string proofId, uint256 eventId, uint256 passId, address attendee, address organizer, uint256 verifiedAt, bool valid))",
-    "function verifyProof(string proofId) view returns (bool found, tuple(string proofId, uint256 eventId, uint256 passId, address attendee, address organizer, uint256 verifiedAt, bool valid) proof)",
-    "function getProofIds() view returns (string[])",
-    "function getProofIdsOf(address attendee) view returns (string[])",
-    "function getProofOfPass(uint256 passId) view returns (string)",
-
-    "event EventCreated(uint256 indexed eventId, address indexed organizer, string name, uint256 capacity)",
-    "event PassClaimed(uint256 indexed passId, uint256 indexed eventId, address indexed attendee, uint256 timestamp)",
-    "event AttendanceVerified(uint256 indexed passId, uint256 indexed eventId, address indexed attendee, uint256 timestamp)",
-    "event ProofCreated(string proofId, uint256 indexed eventId, uint256 indexed passId, address indexed attendee, address organizer, uint256 timestamp)",
-    "event ProofRevoked(string proofId, address by, uint256 timestamp)",
+    "function tickets(address) view returns (address holder, uint256 claimDate, bool isValid)",
+    "function totalClaimed() view returns (uint256)",
+    "function verifyTicket(address userAddress) view returns (bool)",
   ];
 
   /* ─────────────────────────── 3. STATE ─────────────────────────── */
@@ -985,25 +962,13 @@
     if (S.eventsLoaded && !force) return;
     S.eventsLoading = true;
     S.eventsError = null;
-    if (!isConfigured()) {
-      S.events = DEMO_EVENTS.slice();
-      S.eventsLoading = false;
-      S.eventsLoaded = true;
-      return;
-    }
+
     try {
-      const c =
-        S.readContract ||
-        new ethers.Contract(contractAddress(), ABI, S.readProvider);
-      if (!c) throw new Error("no contract");
-      const raw = await c.getAllEvents();
-      S.events = raw
-        .map(normalizeEvent)
-        .sort((a, b) => b.timestamp - a.timestamp);
+      S.events = DEMO_EVENTS.slice();
       S.eventsLoaded = true;
     } catch (e) {
       console.warn("[ProofPass] loadEvents failed", e);
-      S.eventsError = "Unable to read ProofPass contract state.";
+      S.eventsError = "Unable to load events.";
       S.events = [];
     } finally {
       S.eventsLoading = false;
@@ -2657,12 +2622,11 @@
           return;
         }
         await runTransaction({
-          send: () => S.writeContract.claimPass(ev.id),
-          successTitle: "Your ProofPass has been created.",
-          successNote: "Pass claimed on BOT Chain.",
+          send: () => S.writeContract.claimTicket(),
+          successTitle: "Tiket berhasil diklaim!",
+          successNote: "Klaim tiket tercatat di blockchain.",
           onSuccess: async () => {
             await loadUserData();
-            await loadEvents(true);
           },
         });
         setTimeout(render, 600);
