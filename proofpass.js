@@ -1579,37 +1579,10 @@
     const view = $("#view");
     view.innerHTML =
       '<div class="skel" style="height:220px;margin-bottom:20px"></div><div class="skel" style="height:320px"></div>';
-    const e = await loadEvent(id);
-    if (!e) {
-      view.innerHTML = emptyState(
-        '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg>',
-        "Event not found",
-        "No event with that ID exists on BOT Chain.",
-      );
-      return;
-    }
 
-    let claimed = false,
-      passId = null;
-    if (S.connected && isConfigured() && !e.demo) {
-      try {
-        const c =
-          S.readContract ||
-          new ethers.Contract(contractAddress(), ABI, S.readProvider);
-        const pid = await c.getPassOf(e.id, S.account);
-        if (Number(pid) > 0) {
-          claimed = true;
-          passId = Number(pid);
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    }
-    const localPass = S.myPasses.find((p) => p.eventId === e.id) || null;
-    if (localPass) {
-      claimed = true;
-      passId = localPass.id;
-    }
+    // Ambil data event dari daftar demo lokal berdasarkan ID yang diklik
+    const e =
+      DEMO_EVENTS.find((ev) => String(ev.id) === String(id)) || DEMO_EVENTS[0];
 
     const pct = e.capacity
       ? clamp(Math.round((e.totalClaimed / e.capacity) * 100), 0, 100)
@@ -1617,81 +1590,41 @@
     const full = e.capacity > 0 && e.totalClaimed >= e.capacity;
 
     let cta;
-    if (!e.active)
+    if (!S.connected) {
       cta =
-        '<button class="btn btn-lg is-disabled" disabled>Event Closed</button>';
-    else if (claimed)
+        '<button class="btn btn-primary btn-lg" id="claimConnect">Hubungkan Dompet untuk Klaim</button>';
+    } else if (!isConfigured()) {
       cta =
-        '<button class="btn btn-lg is-disabled" disabled>Pass Claimed ✓</button>';
-    else if (full)
+        '<button class="btn btn-primary btn-lg is-disabled" disabled>Contract Address Belum Diset</button>';
+    } else {
       cta =
-        '<button class="btn btn-lg is-disabled" disabled>Event Full</button>';
-    else if (e.demo || !isConfigured())
-      cta =
-        '<button class="btn btn-primary btn-lg" id="claimBtn">Claim Your Pass (requires contract)</button>';
-    else if (!S.connected)
-      cta =
-        '<button class="btn btn-primary btn-lg" id="claimConnect">Connect Wallet to Claim</button>';
-    else
-      cta =
-        '<button class="btn btn-primary btn-lg" id="claimBtn">Claim Your Pass</button>';
-
-    const passRow =
-      claimed && (localPass || passId)
-        ? '<div style="margin-top:26px">' +
-          '<div class="kicker acc" style="margin-bottom:12px">Your pass</div>' +
-          ticketHTML({
-            eventName: e.name,
-            date: fmtDate(e.timestamp, S.tz),
-            location: e.location,
-            passId:
-              "#" +
-              String(passId || (localPass && localPass.id) || 0).padStart(
-                5,
-                "0",
-              ),
-            wallet: shortAddr(S.account),
-            serial: "EVENT-" + String(e.id).padStart(4, "0"),
-            status: localPass && localPass.attended ? "VERIFIED" : "CLAIMED",
-            network: currentNetwork().short,
-          }) +
-          "</div>"
-        : "";
+        '<button class="btn btn-primary btn-lg" id="claimBtn">Klaim Tiket Saya (claimTicket)</button>';
+    }
 
     view.innerHTML =
-      '<a class="btn btn-quiet btn-sm" href="#/events" style="margin-bottom:18px">← All events</a>' +
+      '<a class="btn btn-quiet btn-sm" href="#/events" style="margin-bottom:18px">← Kembali ke Event</a>' +
       '<div class="grid2" style="grid-template-columns:1.35fr .65fr;gap:34px;align-items:start" id="evDetailGrid">' +
       "<div>" +
       '<div class="row gap8 wrapflex" style="margin-bottom:16px">' +
       '<span class="pill acc">' +
       esc(e.category) +
       "</span>" +
-      (e.demo
-        ? '<span class="pill">DEMO EVENT</span>'
-        : '<span class="pill">ON-CHAIN</span>') +
-      (!e.active
-        ? '<span class="pill bad">CLOSED</span>'
-        : full
-          ? '<span class="pill warn">FULL</span>'
-          : '<span class="pill ok"><i class="dot"></i>OPEN</span>') +
+      '<span class="pill">TICKET CONTRACT READY</span>' +
       "</div>" +
       '<h1 style="font-size:clamp(1.9rem,4.4vw,2.9rem);margin-bottom:14px">' +
       esc(e.name) +
       "</h1>" +
       '<p class="muted" style="font-size:1.02rem;max-width:62ch">' +
-      esc(e.description || "No description provided.") +
+      esc(
+        e.description ||
+          "Klaim tiket on-chain langsung ke smart contract kamu.",
+      ) +
       "</p>" +
       '<div class="grid2" style="margin-top:30px">' +
-      '<div class="card-flat"><div class="kicker">Date & time</div><div style="margin-top:8px;font-weight:500">' +
+      '<div class="card-flat"><div class="kicker">Waktu</div><div style="margin-top:8px;font-weight:500">' +
       esc(fmtDateLong(e.timestamp, S.tz)) +
-      '</div><div class="small muted">' +
-      esc(fmtTime(e.timestamp, S.tz)) +
-      " · " +
-      esc(tzInfo(e.tz).city) +
-      " (" +
-      esc(tzOffset(e.tz, new Date(e.timestamp))) +
-      ")</div></div>" +
-      '<div class="card-flat"><div class="kicker">Location</div><div style="margin-top:8px;font-weight:500">' +
+      "</div></div>" +
+      '<div class="card-flat"><div class="kicker">Lokasi</div><div style="margin-top:8px;font-weight:500">' +
       esc(e.location || "—") +
       "</div></div>" +
       '<div class="card-flat"><div class="kicker">Organizer</div><div class="mono small" style="margin-top:8px">' +
@@ -1703,60 +1636,43 @@
       String(e.id).padStart(4, "0") +
       "</div></div>" +
       "</div>" +
-      '<div class="card" style="margin-top:22px">' +
-      '<div class="kicker" style="margin-bottom:12px">Blockchain record</div>' +
-      '<div class="kv">' +
-      '<div><div class="k">Contract</div><div class="v mono">' +
-      (contractAddress()
-        ? esc(shortAddr(contractAddress()))
-        : "Not configured") +
-      "</div></div>" +
-      '<div><div class="k">Network</div><div class="v">' +
-      esc(currentNetwork().name) +
-      " · " +
-      currentNetwork().id +
-      "</div></div>" +
-      '<div><div class="k">Status</div><div class="v">' +
-      (e.active ? "Active" : "Closed") +
-      "</div></div>" +
-      "</div>" +
-      (contractAddress()
-        ? '<a class="link-out small" style="margin-top:16px" target="_blank" rel="noopener noreferrer" href="' +
-          explorerAddr(contractAddress()) +
-          '">View contract on BOT Chain Explorer ↗</a>'
-        : "") +
-      "</div>" +
       "</div>" +
       "<div>" +
       '<div class="card" style="position:sticky;top:120px">' +
-      '<div class="kicker" style="margin-bottom:10px">Capacity</div>' +
-      '<div class="row between" style="align-items:baseline">' +
-      '<b style="font-size:1.9rem;font-weight:600;letter-spacing:-.03em">' +
-      e.totalClaimed +
-      "</b>" +
-      '<span class="mono small dim">of ' +
-      e.capacity +
-      "</span>" +
-      "</div>" +
-      '<div class="capbar" style="height:4px;margin-top:10px"><i style="width:' +
-      pct +
-      '%"></i></div>' +
-      '<div class="mono xs dim" style="margin-top:8px">' +
-      pct +
-      "% CLAIMED</div>" +
+      '<div class="kicker" style="margin-bottom:10px">Status Klaim Tiket</div>' +
       '<div style="margin-top:22px">' +
       cta +
       "</div>" +
-      '<p class="xs dim" style="margin-top:12px">Claiming creates a real transaction on BOT Chain. You will pay network gas in BOT.</p>' +
-      passRow +
+      '<p class="xs dim" style="margin-top:12px">Tombol ini akan memanggil fungsi <b>claimTicket()</b> di Smart Contract kamu secara langsung.</p>' +
       "</div>" +
       "</div>" +
       "</div>";
 
-    const grid = $("#evDetailGrid");
-    if (grid && window.innerWidth < 900) grid.style.gridTemplateColumns = "1fr";
+    // Event listener untuk tombol klaim
+    const cc = $("#claimConnect");
+    if (cc) cc.onclick = connectWallet;
 
-    return e;
+    const cb = $("#claimBtn");
+    if (cb) {
+      cb.onclick = async () => {
+        if (!S.connected) {
+          toast("Hubungkan dompet terlebih dahulu.", "err");
+          return;
+        }
+        if (!isConfigured()) {
+          toast("Contract Address belum dikonfigurasi.", "err");
+          return;
+        }
+        await runTransaction({
+          send: () => S.writeContract.claimTicket(),
+          successTitle: "Tiket Berhasil Diklaim!",
+          successNote: "Transaksi claimTicket sukses di-mining ke blockchain.",
+          onSuccess: async () => {
+            await loadUserData();
+          },
+        });
+      };
+    }
   }
 
   /* -------- MY TICKETS (former Dashboard) -------- */
@@ -1775,42 +1691,66 @@
         '<div class="row center" style="margin-top:20px"><button class="btn btn-primary" id="ticketsConnect">Connect Wallet</button></div>'
       );
     }
-    const claimedCount = S.myPasses.length;
+    const claimedCount = S.myPasses.length + (S.myContractTicket ? 1 : 0);
     const verifiedCount = S.myPasses.filter((p) => p.attended).length;
     const proofCount = S.myProofs.length;
 
-    const passRows = S.myPasses.length
-      ? S.myPasses
-          .map((p) => {
-            const ev = S.events.find((e) => e.id === p.eventId);
-            const name = ev ? ev.name : "Event #" + p.eventId;
-            return (
-              '<div class="card-flat row between gap12 wrapflex" style="margin-bottom:10px">' +
-              '<div style="min-width:180px"><div style="font-weight:500">' +
-              esc(name) +
-              "</div>" +
-              '<div class="mono xs dim" style="margin-top:4px">PASS #' +
-              String(p.id).padStart(5, "0") +
-              " · EVENT #" +
-              p.eventId +
-              "</div></div>" +
-              '<div class="row gap8">' +
-              (p.attended
-                ? '<span class="pill ok"><i class="dot"></i>VERIFIED</span>'
-                : '<span class="pill acc"><i class="dot"></i>CLAIMED</span>') +
-              '<a class="btn btn-ghost btn-sm" href="#/event/' +
-              p.eventId +
-              '">Open</a>' +
-              "</div>" +
-              "</div>"
-            );
-          })
-          .join("")
-      : emptyState(
-          "",
-          "No tickets yet",
-          "Claim a pass for an event to start your participation record.",
-        );
+    // Cek apakah ada tiket dari TicketContract buatan kita
+    let userTicketHTML = "";
+    if (S.myContractTicket) {
+      const t = S.myContractTicket;
+      userTicketHTML =
+        '<div class="card-flat row between gap12 wrapflex" style="margin-bottom:10px">' +
+        '<div style="min-width:180px"><div style="font-weight:500">TicketContract Pass</div>' +
+        '<div class="mono xs dim" style="margin-top:4px">HOLDER: ' +
+        esc(shortAddr(t.holder)) +
+        " · DIKLAIM: " +
+        fmtDate(t.claimDate, S.tz) +
+        "</div></div>" +
+        '<div class="row gap8"><span class="pill ' +
+        (t.isValid ? "ok" : "bad") +
+        '"><i class="dot"></i>' +
+        (t.isValid ? "VALID" : "INVALID") +
+        "</span></div>" +
+        "</div>";
+    }
+
+    const passRows =
+      userTicketHTML +
+      (S.myPasses.length
+        ? S.myPasses
+            .map((p) => {
+              const ev = S.events.find((e) => e.id === p.eventId);
+              const name = ev ? ev.name : "Event #" + p.eventId;
+              return (
+                '<div class="card-flat row between gap12 wrapflex" style="margin-bottom:10px">' +
+                '<div style="min-width:180px"><div style="font-weight:500">' +
+                esc(name) +
+                "</div>" +
+                '<div class="mono xs dim" style="margin-top:4px">PASS #' +
+                String(p.id).padStart(5, "0") +
+                " · EVENT #" +
+                p.eventId +
+                "</div></div>" +
+                '<div class="row gap8">' +
+                (p.attended
+                  ? '<span class="pill ok"><i class="dot"></i>VERIFIED</span>'
+                  : '<span class="pill acc"><i class="dot"></i>CLAIMED</span>') +
+                '<a class="btn btn-ghost btn-sm" href="#/event/' +
+                p.eventId +
+                '">Open</a>' +
+                "</div>" +
+                "</div>"
+              );
+            })
+            .join("")
+        : !userTicketHTML
+          ? emptyState(
+              "",
+              "No tickets yet",
+              "Claim a pass for an event to start your participation record.",
+            )
+          : "");
 
     const proofRows = S.myProofs.length
       ? S.myProofs
@@ -2602,35 +2542,26 @@
     const cc = $("#claimConnect");
     if (cc) cc.onclick = connectWallet;
     const cb = $("#claimBtn");
-    if (cb)
+    if (cb) {
       cb.onclick = async () => {
-        const id = S.route.param;
         if (!S.connected) {
-          toast("Connect your wallet first.", "err");
+          toast("Hubungkan dompet terlebih dahulu.", "err");
           return;
         }
         if (!isConfigured()) {
-          toast(
-            "No contract address configured. Blockchain actions are disabled.",
-            "err",
-          );
-          return;
-        }
-        const ev = await loadEvent(id);
-        if (!ev) {
-          toast("Event not found.", "err");
+          toast("Contract Address belum dikonfigurasi.", "err");
           return;
         }
         await runTransaction({
           send: () => S.writeContract.claimTicket(),
-          successTitle: "Tiket berhasil diklaim!",
-          successNote: "Klaim tiket tercatat di blockchain.",
+          successTitle: "Tiket Berhasil Diklaim!",
+          successNote: "Transaksi claimTicket sukses di-mining ke blockchain.",
           onSuccess: async () => {
-            await loadUserData();
+            toast("Tiket berhasil diklaim ke Smart Contract!", "ok");
           },
         });
-        setTimeout(render, 600);
       };
+    }
   }
 
   function bindVerify() {
