@@ -25,8 +25,8 @@ let S = {
     Nothing else in this file needs to change for a new deployment.          */
   const CONFIG = {
     contractAddresses: {
-      968: "0xd412550A836A7c43F0C63DDE9fbc74b8Ec3A82A6",
-      677: "0x703EdD86DC3df5c125EA8B36A94F53FFAe9499fa",
+      968: "0x1cb0EA1381D5518c86c48d78242E142C5d3d6196",
+      677: "0x1cb0EA1381D5518c86c48d78242E142C5d3d6196",
     },
     defaultNetworkId: 677,
     appName: "ProofPass",
