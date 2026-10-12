@@ -10,7 +10,7 @@ let S = {
   readProvider: null,
   readContract: null,
   writeContract: null,
-  myContractTicket: null, // <-- Taruh di sini di dalam objek S
+  myContractTicket: null,
   events: [],
   myPasses: [],
   myProofs: [],
@@ -25,8 +25,8 @@ let S = {
     Nothing else in this file needs to change for a new deployment.          */
   const CONFIG = {
     contractAddresses: {
-      968: "0x406AB5033423Dcb6391Ac9eEEad73294FA82Cfbc", // ← BOT Chain Testnet address  (e.g. "0x1234…")
-      677: "0x703EdD86DC3df5c125EA8B36A94F53FFAe9499fa", // ← BOT Chain Mainnet address  (e.g. "0xabcd…")
+      968: "0xd412550A836A7c43F0C63DDE9fbc74b8Ec3A82A6",
+      677: "0x703EdD86DC3df5c125EA8B36A94F53FFAe9499fa",
     },
     defaultNetworkId: 677,
     appName: "ProofPass",
@@ -62,6 +62,13 @@ let S = {
   const ABI = [
     {
       inputs: [],
+      name: "claimTicket",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
       stateMutability: "nonpayable",
       type: "constructor",
     },
@@ -77,13 +84,6 @@ let S = {
       ],
       name: "TicketClaimed",
       type: "event",
-    },
-    {
-      inputs: [],
-      name: "claimTicket",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
     },
     {
       inputs: [],
@@ -155,22 +155,6 @@ let S = {
           name: "",
           type: "bool",
         },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [{ internalType: "uint256", name: "eventId", type: "uint256" }],
-      name: "getEvent",
-      outputs: [
-        { internalType: "uint256", name: "id", type: "uint256" },
-        { internalType: "address", name: "organizer", type: "address" },
-        { internalType: "string", name: "name", type: "string" },
-        { internalType: "string", name: "metadataURI", type: "string" },
-        { internalType: "uint256", name: "eventTimestamp", type: "uint256" },
-        { internalType: "uint256", name: "capacity", type: "uint256" },
-        { internalType: "uint256", name: "totalClaimed", type: "uint256" },
-        { internalType: "bool", name: "active", type: "bool" },
       ],
       stateMutability: "view",
       type: "function",
