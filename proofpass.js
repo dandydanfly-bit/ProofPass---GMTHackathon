@@ -28,7 +28,7 @@ let S = {
       968: "0x406AB5033423Dcb6391Ac9eEEad73294FA82Cfbc", // ← BOT Chain Testnet address  (e.g. "0x1234…")
       677: "0x703EdD86DC3df5c125EA8B36A94F53FFAe9499fa", // ← BOT Chain Mainnet address  (e.g. "0xabcd…")
     },
-    defaultNetworkId: 968,
+    defaultNetworkId: 677,
     appName: "ProofPass",
     appUrl: (location.origin + location.pathname).replace(/\/$/, ""),
   };
